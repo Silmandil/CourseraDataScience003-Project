@@ -107,10 +107,11 @@ create_tidy_summary = function(dt)
     pry1 <- ddply(dt, .(subject, activity), function(x) numcolwise(mean)(x)) # oh right, that was easy.
 
     final_table <- pry1 #tbd
-    write.table(final_table, "./Output.txt", sep="\t")
+    write.table(final_table, "../Summary.txt", sep="\t")
 }
 
-#setwd("./UCI HAR dataset")
+if(!any(grepl("test", dir())))
+    setwd("./UCI HAR dataset")
 
 xt <- merge_test_train_sets()
 mt <- extract_mean_sd(xt)
