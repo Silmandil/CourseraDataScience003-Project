@@ -7,9 +7,11 @@ library("plyr")
 #4. Appropriately labels the data set with descriptive activity names. 
 #5. Create a second, independent tidy data set with the average of each variable for each activity and each subject. 
 
+
+#Don't mind this function, purely for debugging with a smaller set.
 load_test = function(directory = .)
 {
-    features <- read.table("features.txt")
+    features <- read.table(paste(directory, "features.txt", sep='/'))
     named_features <- as.character(features[,2])
     xtest <- read.table("test/X_test.txt", col.names=named_features)
     xtestactivity <- read.table("test/y_test.txt")
@@ -26,23 +28,23 @@ load_test = function(directory = .)
 #1. Merge the training and the test sets to create one data set.
 merge_test_train_sets = function(directory = .) 
 {
-    features <- read.table("features.txt")
+    features <- read.table(paste(directory, "features.txt", sep='/'))
     named_features <- as.character(features[,2])
-    xtest <- read.table("test/X_test.txt", col.names=named_features)
-    xtestactivity <- read.table("test/y_test.txt")
+    xtest <- read.table(paste(directory, "test/X_test.txt", sep='/'), col.names=named_features)
+    xtestactivity <- read.table(paste(directory, "test/y_test.txt", sep='/'))
     xtestprime <- cbind(xtestactivity[[1]], xtest)
     names(xtestprime)[[1]] <- "activity_num"
     
-    xtestsubject <- read.table("test/subject_test.txt")
+    xtestsubject <- read.table(paste(directory, "test/subject_test.txt", sep='/'))
     xtestprime <- cbind(xtestsubject[[1]], xtestprime)
     names(xtestprime)[[1]] <- "subject"
     
-    xtrain <- read.table("train/X_train.txt", col.names=named_features)
-    xtrainactivity <- read.table("train/y_train.txt")
+    xtrain <- read.table(paste(directory, "train/X_train.txt", sep='/'), col.names=named_features)
+    xtrainactivity <- read.table(paste(directory, "train/y_train.txt", sep='/'))
     xtrainprime <- cbind(xtrainactivity[[1]], xtrain)
     names(xtrainprime)[[1]] <- "activity_num"
 
-    xtrainsubject <- read.table("train/subject_train.txt")
+    xtrainsubject <- read.table(paste(directory, "train/subject_train.txt", sep='/'))
     xtrainprime <- cbind(xtrainsubject[[1]], xtrainprime)
     names(xtrainprime)[[1]] <- "subject"
     
@@ -74,9 +76,9 @@ extract_mean_sd = function(dt)
 
 # This function modifies an existing data table.
 #3. Use descriptive activity names to name the activities in the data set
-name_activities = function(dt)
+name_activities = function(dt, directory = .)
 {
-    activity_labels <- read.table("activity_labels.txt")
+    activity_labels <- read.table(paste(directory, "activity_labels.txt", sep='/'))
     names(activity_labels) <- c("activity_num", "activity")
     nt <- merge(activity_labels, dt)    #join them based on the common column
     nt$activity_num <- NULL         #drop the id column since we have names now.
@@ -107,15 +109,14 @@ create_tidy_summary = function(dt)
     pry1 <- ddply(dt, .(subject, activity), function(x) numcolwise(mean)(x)) # oh right, that was easy.
 
     final_table <- pry1 #tbd
-    write.table(final_table, "../Summary.txt", sep="\t")
+    write.table(final_table, "./Summary.txt", sep="\t")
 }
 
-if(!any(grepl("test", dir())))
-    setwd("./UCI HAR dataset")
+mydir <- if(!any(grepl("test", dir()))) "./UCI HAR dataset" else "."
 
-xt <- merge_test_train_sets()
+xt <- merge_test_train_sets(mydir)
 mt <- extract_mean_sd(xt)
-nt <- name_activities(mt)
+nt <- name_activities(mt, mydir)
 pt <- make_features_pretty(nt)
 create_tidy_summary(pt)
 

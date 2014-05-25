@@ -7,3 +7,6 @@ This project will:
 4. Rename the features to make them prettier. 
 5. Create a second, independent tidy data set with the average of each variable for each activity and each subject. 
 
+
+Run this function in the directory that contains the directory 'UCI HAR data' or the 'test' and 'train' subdirectories.
+
